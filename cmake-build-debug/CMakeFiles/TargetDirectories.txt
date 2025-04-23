@@ -1,0 +1,12 @@
+/Users/julerieger/Desktop/Uni/3.Semester/raytracing.github.io/cmake-build-debug/CMakeFiles/inOneWeekend.dir
+/Users/julerieger/Desktop/Uni/3.Semester/raytracing.github.io/cmake-build-debug/CMakeFiles/theNextWeek.dir
+/Users/julerieger/Desktop/Uni/3.Semester/raytracing.github.io/cmake-build-debug/CMakeFiles/theRestOfYourLife.dir
+/Users/julerieger/Desktop/Uni/3.Semester/raytracing.github.io/cmake-build-debug/CMakeFiles/cos_cubed.dir
+/Users/julerieger/Desktop/Uni/3.Semester/raytracing.github.io/cmake-build-debug/CMakeFiles/cos_density.dir
+/Users/julerieger/Desktop/Uni/3.Semester/raytracing.github.io/cmake-build-debug/CMakeFiles/integrate_x_sq.dir
+/Users/julerieger/Desktop/Uni/3.Semester/raytracing.github.io/cmake-build-debug/CMakeFiles/pi.dir
+/Users/julerieger/Desktop/Uni/3.Semester/raytracing.github.io/cmake-build-debug/CMakeFiles/estimate_halfway.dir
+/Users/julerieger/Desktop/Uni/3.Semester/raytracing.github.io/cmake-build-debug/CMakeFiles/sphere_importance.dir
+/Users/julerieger/Desktop/Uni/3.Semester/raytracing.github.io/cmake-build-debug/CMakeFiles/sphere_plot.dir
+/Users/julerieger/Desktop/Uni/3.Semester/raytracing.github.io/cmake-build-debug/CMakeFiles/edit_cache.dir
+/Users/julerieger/Desktop/Uni/3.Semester/raytracing.github.io/cmake-build-debug/CMakeFiles/rebuild_cache.dir

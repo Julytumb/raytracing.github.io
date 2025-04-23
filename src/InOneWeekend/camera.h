@@ -13,10 +13,17 @@
 
 #include "hittable.h"
 #include "material.h"
+#include <sys/mman.h>
+
+#include <unistd.h>      // fork()
+#include <sys/types.h>   // pid_t
+#include <sys/wait.h>    // wait()#
+#include <iostream>
+#include <vector>
 
 
 class camera {
-  public:
+public:
     double aspect_ratio      = 1.0;  // Ratio of image width over height
     int    image_width       = 100;  // Rendered image width in pixel count
     int    samples_per_pixel = 10;   // Count of random samples for each pixel
@@ -33,21 +40,75 @@ class camera {
     void render(const hittable& world) {
         initialize();
 
-        std::cout << "P3\n" << image_width << ' ' << image_height << "\n255\n";
+ //       std::cout << "P3\n" << image_width << ' ' << image_height << "\n255\n";
+ //       for (int j = 0; j < image_height; j++) {
+ //          std::clog << "\rScanlines remaining: " << (image_height - j) << ' ' << std::flush;
+ //        renderLine(world,j);
+ //      }
+        std::vector<pid_t> children;
+        children.reserve(image_height);
 
-        for (int j = 0; j < image_height; j++) {
-            std::clog << "\rScanlines remaining: " << (image_height - j) << ' ' << std::flush;
-            for (int i = 0; i < image_width; i++) {
-                color pixel_color(0,0,0);
-                for (int sample = 0; sample < samples_per_pixel; sample++) {
-                    ray r = get_ray(i, j);
-                    pixel_color += ray_color(r, max_depth, world);
-                }
-                write_color(std::cout, pixel_samples_scale * pixel_color);
+        int total_bytes = sizeof(color) * image_width * image_height;
+        color* shared_buffer = (color*)mmap(
+          nullptr, total_bytes,
+          PROT_READ | PROT_WRITE,
+          MAP_SHARED | MAP_ANONYMOUS,
+          -1, 0
+        );
+        if (shared_buffer == MAP_FAILED) { perror("mmap"); exit(1); }
+
+        for (int j = 0; j < image_height; ++j) {
+            pid_t pid = fork();
+            if (pid < 0) {
+                // Fork-Fehler
+                std::perror("fork failed");
+                exit(EXIT_FAILURE);
+            }
+            else if (pid == 0) {
+                // Kind-Prozess
+                renderLine(world, j, shared_buffer);
+                _exit(EXIT_SUCCESS);  // Sichere Beendigung im Kind
+            }
+            else {
+                // Eltern-Prozess
+                children.push_back(pid);
             }
         }
 
+        // In der Eltern-Schleife auf alle Kinder warten
+        int remaining = image_height;
+        for (pid_t child : children) {
+            int status;
+            if (waitpid(child, &status, 0) > 0) {
+                --remaining;
+                std::clog << "\rScanlines remaining: " << remaining << ' ' << std::flush;
+            }
+        }
+        std::clog << "\nAll lines rendered.\n";
+        write_image(shared_buffer,image_width, image_height,pixel_samples_scale);
         std::clog << "\rDone.                 \n";
+    }
+
+
+    void write_image(const color* rendered_image, int image_width, int image_height, double pixel_samples_scale) {
+        std::cout << "P3\n" << image_width << ' ' << image_height << "\n255\n";
+        for (int j = 0; j < image_height; ++j) {
+            for (int i = 0; i < image_width; ++i) {
+                color pixel_color = rendered_image[j * image_width + i];
+                write_color(std::cout, pixel_color * pixel_samples_scale);
+                }
+            }
+        }
+
+   void renderLine(const hittable& world, const int currentLine, color* buffer) {
+        for (int i = 0; i < image_width; i++) {
+            color pixel_color(0,0,0);
+            for (int sample = 0; sample < samples_per_pixel; sample++) {
+                ray r = get_ray(i, currentLine);
+                pixel_color += ray_color(r, max_depth, world);
+            }
+            buffer[currentLine * image_width + i] = pixel_color;
+        }
     }
 
   private:
